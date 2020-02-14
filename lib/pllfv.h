@@ -1,7 +1,8 @@
 // Laboratory work 1 on the discipline LOIS
 // Completed by student of group 721702 BSUIR Komar Alexander Nazarovich
 // H-file of library of propositional logic language formula verifier
-// Version 3. Using PCRE. Moving from main-file to separated library.
+// Version 4. Merge compiling and verifying in one function. Add exception class
+// for pcre compilation. Cleaning code
 //
 // www.pcre.org
 // https://www.opennet.ru/base/dev/pcre_cpp.txt.html
@@ -10,6 +11,8 @@
 
 #ifndef PLLFV_H
 #define PLLFV_H
+
+#include <exception>
 
 // String of pattern of propositional language language formula,
 // that defined by a grammar:
@@ -26,7 +29,7 @@
 //	<unary complex formula>::=<opening bracket><negation><formula><closing bracket>
 //	<binary complex formula>::=<opening bracket><formula><binary operation><formula><closing bracket>
 //	<formula>		::=<constant>|<atom>|<unary complex formula>|<binary complex formula>
-const static std::string DEFAULT_FORMULA_PATTERN = "(?(DEFINE)"
+const static char* DEFAULT_FORMULA_PATTERN = "(?(DEFINE)"
                                     "(?'atom'[A-Z])"
                                     "(?'const'0|1)"
                                     "(?'binop'[&|~]|->)"
@@ -35,15 +38,16 @@ const static std::string DEFAULT_FORMULA_PATTERN = "(?(DEFINE)"
                                     "(?'formula'(?P>atom)|(?P>const)|(?P>unf)|(?P>binf)))"
                                     "^(?P>formula)$";
 
-// compileRegexp()
-// Compile string of pattern, written by PCRE.
-// Return a pointer to a private data structure that contains the compiled pattern,
-// or NULL if an error was detected (by www.pcre.org)
-pcre *compileRegexp(const char *pattern);
-
 // matchRegexp()
 // Verify that string completely match regular expression.
 // Return true if it's match, and false if not (or match not incompletely).
-bool matchRegexp(const pcre *regular, const char *str, int len);
+bool matchRegexp(const char *pattern, const char *str, int len);
+
+// PcreCompilationException
+// Throws if pcre compilation by pattern failed
+class PcreCompilationException: public std::exception
+{
+    const char* what() const noexcept override;
+};
 
 #endif //PLLFV_H
