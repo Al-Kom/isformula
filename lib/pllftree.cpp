@@ -6,25 +6,29 @@
 #include "pllfv.h"
 
 Node::~Node() {
-    if(left)    delete left;
-    if(right)   delete right;
+    delete left;
+    delete right;
+}
+
+std::string Node::toString() {
+    if(data == BIN_IMPL)
+        return "->";
+    return std::string({data});
 }
 
 PllfTree::PllfTree() { root_ = new Node(); }
 
-PllfTree::~PllfTree() {
+PllfTree::~PllfTree() = default;
 
-}
-
-void PllfTree::generate(const char *str, int len) {
+void PllfTree::generate(std::string str) {
     Clean();
-    if(!matchRegexp(DEFAULT_FORMULA_PATTERN, str, len)) {
+    if(!matchRegexp(DEFAULT_FORMULA_PATTERN, str.c_str(), str.length())) {
         //manage error
         Clean();
         throw BadSyntaxException();
     }
     Node *current = root_;
-    for (int i = 0; i < len; i++) {
+    for (auto i = 0; i < str.length(); i++) {
         //check if atom
         if(str[i] >= 'A' && str[i] <= 'Z') {
             // set atom to current node
@@ -94,6 +98,86 @@ void PllfTree::Clean() {
     delete root_;
     root_ = new Node();
 }
+
+std::string PllfTree::toString() {
+    return dfsGetData(root_);
+}
+
+std::string PllfTree::dfsGetData(Node *current) {
+    if(current->left) {
+        if(current->data == UN_NEG)
+            return "(!" + dfsGetData(current->left) + ")";     // unary formula
+        // binary formula
+        return "(" + dfsGetData(current->left) + current->toString() + dfsGetData(current->right) + ")";
+    }
+    // atom and constant
+    return current->toString();
+}
+
+void PllfTree::randomGenerate() {
+    Clean();
+    Node *current = root_;
+    generateFormulaNode(current);
+}
+
+void PllfTree::generateFormulaNode(Node *current) {
+    switch (rand() % 4) {
+        case 0:
+            generateAtomNode(current);
+            break;
+        case 1:
+            generateConstantNode(current);
+            break;
+        case 2:
+            generateUnaryFormulaNode(current);
+            break;
+        case 3:
+            generateBinaryFormulaNode(current);
+            break;
+    }
+}
+
+void PllfTree::generateAtomNode(Node *current) {
+    current->data = char(rand() % ('Z' - 'A') + 'A');
+}
+
+void PllfTree::generateConstantNode(Node *current) {
+    current->data = (rand() % 2) ? CONST_ONE : CONST_ZERO;
+}
+
+void PllfTree::generateUnaryFormulaNode(Node *current) {
+    current->data = UN_NEG;
+    current->left = new Node();
+    current->left->parent = current;
+    generateFormulaNode(current->left);
+}
+
+void PllfTree::generateBinaryFormulaNode(Node *current) {
+    //set random binary operation
+    switch(rand()%4) {
+        case 0:
+            current->data = BIN_IMPL;
+            break;
+        case 1:
+            current->data = BIN_CONJ;
+            break;
+        case 2:
+            current->data = BIN_DISJ;
+            break;
+        case 3:
+            current->data = BIN_EQUAL;
+            break;
+    }
+    //generate left operand
+    current->left = new Node();
+    current->left->parent = current;
+    generateFormulaNode(current->left);
+    //generate right operand
+    current->right = new Node();
+    current->right->parent = current;
+    generateFormulaNode(current->right);
+}
+
 
 const char *BadSyntaxException::what() const noexcept {
     return "Bad formula syntax";

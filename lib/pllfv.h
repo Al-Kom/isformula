@@ -47,7 +47,10 @@ bool matchRegexp(const char *pattern, const char *str, int len);
 // Throws if pcre compilation by pattern failed
 class PcreCompilationException: public std::exception
 {
+public:
     const char* what() const noexcept override;
 };
+
+
 
 #endif //PLLFV_H
