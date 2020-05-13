@@ -1,5 +1,8 @@
-//
-// Created by ksan on 26.02.20.
+// Laboratory work 2 on the discipline LOIS
+// Completed by student of group 721702 BSUIR Komar Alexander Nazarovich
+// H-file of library of propositional logic language formula verifier tree
+// Version 3. Add calculation of truth table and tautology test.
+// Clean code. Improve readability
 //
 
 #ifndef PLLFTREE_H
@@ -7,6 +10,7 @@
 
 #include <exception>
 #include <string>
+#include <map>
 
 enum NodeData : char {
     CONST_ZERO = '0',
@@ -25,15 +29,16 @@ enum NodeData : char {
 class Node {
 public:
     virtual ~Node();
+
     Node *parent;
     Node *left;
     Node *right;
-    char data;
+    char data = ' ';
+
     std::string toString();
 };
 
-class PllfTree
-{
+class PllfTree {
 public:
     PllfTree();
 
@@ -53,6 +58,12 @@ public:
      * Return string interpretation of formula tree
      */
     std::string toString();
+
+    std::string getVariables();
+
+    bool **getTruthTable();
+
+    bool isTautology();
 
 private:
     /*
@@ -101,12 +112,15 @@ private:
      * Generate random binary formula nodes and data of the nodes for current node.
      */
     void generateBinaryFormulaNode(Node *current);
+
+    bool calculate(std::map<char, bool> valueMap);
+
+    bool dfsCalculate(Node *current, std::map<char, bool> valueMap);
 };
 
-class BadSyntaxException: public std::exception
-{
+class BadSyntaxException : public std::exception {
 public:
-    const char* what() const noexcept override;
+    const char *what() const noexcept override;
 };
 
 #endif //PLLFTREE_H
