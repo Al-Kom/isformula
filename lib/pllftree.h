@@ -28,6 +28,8 @@ enum NodeData : char {
 
 class Node {
 public:
+    Node();
+
     virtual ~Node();
 
     Node *parent;
@@ -113,8 +115,9 @@ private:
      */
     void generateBinaryFormulaNode(Node *current);
 
-    bool calculate(std::map<char, bool> valueMap);
-
+    /*
+     * Depth-first calculate logical value of node
+     */
     bool dfsCalculate(Node *current, std::map<char, bool> valueMap);
 };
 

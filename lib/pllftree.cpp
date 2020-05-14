@@ -11,6 +11,10 @@
 #include "pllftree.h"
 #include "pllfv.h"
 
+Node::Node() {
+    parent = left = right = nullptr;
+}
+
 Node::~Node() {
     delete left;
     delete right;
@@ -117,7 +121,7 @@ std::string PllfTree::dfsGetData(Node *current) {
             return "(!" + dfsGetData(current->left) + ")";
         // binary formula
         return "(" + dfsGetData(current->left) + current->toString()
-                + dfsGetData(current->right) + ")";
+               + dfsGetData(current->right) + ")";
     }
     // atom or constant
     return current->toString();
@@ -224,13 +228,9 @@ bool **PllfTree::getTruthTable() {
         for (int j = 0; j < (int) vars.length(); ++j)
             valueMap.insert(std::pair<char, bool>(vars[j], truthTable[i][j]));
         // calc result
-        truthTable[i][colsN - 1] = calculate(valueMap);
+        truthTable[i][colsN - 1] = dfsCalculate(root_, valueMap);
     }
     return truthTable;
-}
-
-bool PllfTree::calculate(std::map<char, bool> valueMap) {
-    return dfsCalculate(root_, std::move(valueMap));
 }
 
 bool PllfTree::dfsCalculate(Node *current, std::map<char, bool> valueMap) {
